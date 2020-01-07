@@ -1,0 +1,5 @@
+numpy
+matplotlib
+pandas
+scipy>=1.2.1
+pathlib

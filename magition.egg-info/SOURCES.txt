@@ -1,0 +1,8 @@
+README.md
+setup.py
+magition.egg-info/PKG-INFO
+magition.egg-info/SOURCES.txt
+magition.egg-info/dependency_links.txt
+magition.egg-info/entry_points.txt
+magition.egg-info/requires.txt
+magition.egg-info/top_level.txt
