@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="blmono",
+    name="blxo",
     version=version,
     author="darwinqii",
     author_email="peng.qi@usask.ca",
@@ -26,5 +26,5 @@ setuptools.setup(
         'pandas',
         'scipy>=1.2.1',
         'pathlib'
-    ],entry_points={'console_scripts':['mc=blmono:mc','math_physics=blmono:math_physics']}
+    ],entry_points={'console_scripts':['mc=blxo:mc','math_physics=blxo:math_physics']}
 )
