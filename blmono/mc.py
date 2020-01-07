@@ -1,80 +1,107 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 
+class BentLaueMono:
+    
+    def __init__(self, chi,theta,nu,T,R,p,S=0,hkl=(1,1,1)): # radians, mm. 
+        self.chi=chi
+        self.theta=theta
+        self.nu=nu
+        self.T=T
+        self.R=R
+        self.p=p
+        self.S=S
+        self.hkl=hkl
+        self.geo_focus = np.cos(chi-theta)/(np.cos(chi+theta)/p+2.0/R)
+        self.single_ray_focus = (self.R*np.sin(2.0*self.theta))/ \
+                                (2.0*np.sin(self.chi+self.theta)+ \
+                                    (1+self.nu)*np.sin(2.0*self.chi)*np.cos(self.chi+self.theta))
+        self.energy_resolution=self.EnergyResolution(self)
+        self.quasi_mono_beam=self.QuasiMonoBeam(self)
 
+    def darwin_width(self):
+        darwin_code = {(1,1,1):134.3e-6}
+        return darwin_code[self.hkl]
+
+    def delta_chi(self):
+        delta_chi = -(1+self.nu)*self.T*np.sin(2*self.chi)/(2*self.R)
+        return delta_chi
+    def delta_psi(self):
+        delta_psi = -self.T*np.tan(self.theta-self.chi)/self.R
+        return delta_psi
+    def theta_div(self):
+        theta_div = (self.T/self.p)*(np.sin(2*self.theta)/np.cos(self.chi-self.theta))
+        return theta_div
+    def magic_condition_angles(self):
+        misalignment= self.delta_psi()-self.delta_chi()-1/2*self.theta_div()
+        return misalignment
+
+    def geo_focus(self,chi,theta,p,R):
+        f_g = np.cos(chi-theta)/(np.cos(chi+theta)/p+2.0/R)
+        return f_g
+    def single_ray_focus(self):
+        f_s = (self.R*np.sin(2.0*self.theta))/(2.0*np.sin(self.chi+self.theta)+(1+self.nu)*np.sin(2.0*self.chi)*np.cos(self.chi+self.theta))
+        return f_s
+    def magic_condition_foci(self):
+        return self.single_ray_focus()-self.geo_focus(chi=self.chi,theta=self.theta,p=self.p,R=self.R)
+
+    def delta_theta_B01(self):
+        return -1/2*self.theta_div()
+
+    class EnergyResolution: # Angular
+        def __init__(self,mono):
+            chi=mono.chi
+            theta=mono.theta
+            nu=mono.nu
+            T=mono.T
+            R=mono.R
+            p=mono.p
+            S=mono.S
+            self.de1 = -T/R*(np.cos(chi)**2-nu*np.sin(chi)**2)*np.tan(theta) # d-spacing
+            self.de2 = mono.delta_theta_B01() # finite source distance
+            self.de3 = mono.darwin_width()*np.tan(theta) # darwin width
+            self.de4 = S/p # source size
+
+    class QuasiMonoBeam:
+        def __init__(self,mono):
+            self.mono=mono
+        def width(self):
+            chi_1 = self.mono.chi+self.mono.delta_chi()
+            theta_offset = self.mono.magic_condition_angles()
+            theta_source_distance = self.mono.delta_theta_B01()
+            theta_B1 = self.mono.theta+theta_offset+theta_source_distance
+            fg_1 = self.mono.geo_focus(chi=chi_1,theta=theta_B1,p=self.mono.p,R=self.mono.R)
+            theta_open = 2*self.mono.magic_condition_angles()
+            width=-fg_1*theta_open
+            return width
+        def foot_length(self):
+
+            
+
+    
+
+    
+
+    
+
+#%%
+mono = BentLaueMono(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,T=0.3,R=2000,p=22000)
+print(mono.delta_chi())
+print(mono.delta_psi())
+print(mono.magic_condition_angles())
+print(mono.energy_resolution.de3)
+print(mono.quasi_mono_beam.width())
+
+#%%
+import mc_backup
+import numpy as np
+mc_backup.mono_beam_width(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,T=0.3,R=2000,D=22000)
+#%%
+    
 # For the Magic Condition equation (angles)
-def delta_chi(chi,nu,R,T,verbose=False):
-    d_chi = -(1+nu)*T*np.sin(2*chi)/(2*R)
-    if verbose:
-        print('$\Delta\chi$:',d_chi)
-    return d_chi
 
-def delta_phi(chi,theta,R,T,verbose=False):
-    d_phi = T*np.tan(theta-chi)/R
-    if verbose:
-        print('$\Delta\phi$:',d_phi)
-    return d_phi
-
-def delta_theta_source_distance(chi,theta,D,T,verbose=False):
-    d_theta=-(T/(2*D))*(np.sin(2*theta)/np.cos(chi-theta))
-    if verbose:
-        print('Angular spread from source distance (Bragg angle variation):',d_theta)
-    return d_theta
-
-def delta_theta_d_spacing(chi,theta,nu,R,T,verbose=False):
-    d_theta = -(T/R)*(np.cos(chi)**2-nu*np.sin(chi)**2)*np.tan(theta)
-    if verbose:
-        print('Angular spread from d-spacing',d_theta)
-    return d_theta
-
-def delta_theta_darwin(theta,hkl=[1,1,1],verbose=False):
-    darwin_code = {[1,1,1]:134.3e-6}
-    d_theta = darwin_code[hkl]*np.tan(theta)
-    if verbose:
-        print('Angular spread from Darwin width',d_theta)
-    return d_theta
-
-def delta_theta_source_size(D,S,verbose=False):
-    d_theta = S/D
-    if verbose:
-        print('Angular spread from source size',d_theta)
-    return d_theta
-
-def geo_focus(chi,theta,R,D,verbose=False):
-    f_g = np.cos(chi-theta)/(np.cos(chi+theta)/D+2.0/R)
-    if verbose:
-        print('Geometric focus (f_g)',f_g,'(mm)')
-    return f_g
-
-def single_ray_focus(chi,theta,R,D,nu,verbose=False):
-    f_s = (R*np.sin(2.0*theta))/(2.0*np.sin(chi+theta)+(1+nu)*np.sin(2.0*chi)*np.cos(chi+theta))
-    if verbose:
-        print('Single ray focus (f_s)',f_s,'(mm)')
-    return f_s
-
-def magic_condition_angles(chi,theta,nu,T,R,D,verbose=False): # chi: rad; theta: rad; T,R,D: mm
-    # todo: Correction for magic condition sign
-    term1 = delta_chi(chi,nu,R,T,verbose)
-    term2 = delta_phi(chi,theta,R,T,verbose)
-    term3 = -delta_theta_source_distance(chi,theta,D,T,verbose)
-    angles_distance = (term1+term2+term3)
-    # print('I am working')
-    if verbose:
-        print('Contributions from chi, phi, source distance:',term1,term2,term3)
-        print('Magic condition offset in angle:',angles_distance)
-    return angles_distance
-
-def magic_condition_foci(chi, theta,nu, R, D,verbose=False):
-    # polychromatic focus function
-    f_s = single_ray_focus(chi,theta,R,D,nu,verbose)
-    # geometric focus function
-    f_g = geo_focus(chi,theta,R,D,verbose)
-    # magic condition
-    foci_distance = f_s-f_g
-    if verbose:
-        print('Magic condition offset in foci distance:',foci_distance)
-    return foci_distance
 
 def theta_b2_fsolver(chi,theta,nu,T,R,D,verbose=False):
     def theta_b2_equation(theta_b2,chi=chi,theta=theta,nu=nu,R=R,D=D,T=T,verbose=verbose):
