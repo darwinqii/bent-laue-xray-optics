@@ -1,2 +1,3 @@
-from magition import mc
-from magition import math_physics as mp
+import mc
+import math_physics as mp
+import geometry

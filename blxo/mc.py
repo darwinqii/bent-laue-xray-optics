@@ -1,7 +1,14 @@
 # %%
+import os
+
+file_dir = os.path.dirname(os.path.abspath(__file__))
+import sys
+
+sys.path.extend([file_dir])
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
+import geometry
 
 '''
 alpha: Incident ray angle divergence from a point source with FINITE source distance.
@@ -12,39 +19,35 @@ delta_theta_AB: The Bragg angle divergence from A to B. Or `theta_B-theta_A`.
 chi: Angles refering to asymmetry angle. 
 
 
+
+TODO: keep the calculated values (eg. geo_focus()) as a method, so that it cannot be altered simply by assigning a value
+
 '''
-
-
-# TODO: - _ or __ . which one should I use? Probably the single underscore _.
-# TODO: Before stopped, I was working on the chi_1, chi_2, theta_1, theta_2 things. so to help the energy spread.
 
 class BentLaueMono:
 
     def __init__(self, chi, theta, nu, t, r, p, s=0, hkl=(1, 1, 1)):  # radians, mm.
-        self.chi = chi
-        self.theta = theta
-        self.nu = nu
-        self.t = t
-        self.r = r
+        self.__chi = chi
+        self.__theta = theta
+        self.__nu = nu
+        self.__t = t
+        self.__r = r
         self.__p = p
-        self.s = s
-        self.hkl = hkl
-        self.geo_focus = geo_focus(chi=chi, theta=theta, p=p, r=r)
-        self.single_ray_focus = single_ray_focus(chi, theta, nu, r)
-        self.theta_Bmis = magic_condition_angles(chi, theta, nu, t, r, p)
-        self.energy_resolution = self.EnergyResolution(self)
-        self.quasi_mono_beam = QuasiMonoBeam(chi, theta, nu, t, r, p)
-        self.
+        self.__s = s
+        self.__hkl = hkl
+        # self.geo_focus = geo_focus(chi=chi, theta=theta, p=p, r=r)
+        # self.single_ray_focus = single_ray_focus(chi, theta, nu, r)
+        # self.theta_Bmis = magic_condition_angles(chi, theta, nu, t, r, p)
+        # self.energy_resolution = self.EnergyResolution(self)
+        # self.quasi_mono_beam = QuasiMonoBeam(chi, theta, nu, t, r, p)
 
-    def get_p():
-        return
+    # def get_geo_focus(self):
+    #
+    #     # geology focus
+    #     # formula = xxxxx
+    #     return np.cos(self.chi - self.theta) / (np.cos(self.chi + self.theta) / p + 2.0 / r)
 
-    def get_geo_focus(self):
-        # geology focus
-        # formula = xxxxx
-        return np.cos(self.chi - self.theta) / (np.cos(self.chi + self.theta) / p + 2.0 / r)
-
-    def get_energy_resolution():
+    def get_energy_resolution(self):
         de1 = -t / r * (np.cos(chi) ** 2 - nu * np.sin(chi) ** 2) * np.tan(theta)  # d-spacing
         de2 = delta_theta_B01(chi, theta, t, p)  # finite source distance
         de3 = darwin_width(mono.hkl) * np.tan(theta)  # darwin width
@@ -52,27 +55,6 @@ class BentLaueMono:
 
         return {"de1": de1}
 
-    get()["de1"]
-
-
-bent = BentLaueMono(x, x, x, x, x)
-bent.get_geo_focus()
-bent.geo_focus = 10
-
-
-class EnergyResolution:  # Angular
-    def __init__(self, mono):
-        chi = mono.chi
-        theta = mono.theta
-        nu = mono.nu
-        t = mono.t
-        r = mono.r
-        p = mono.p
-        s = mono.s
-        self.de1 = -t / r * (np.cos(chi) ** 2 - nu * np.sin(chi) ** 2) * np.tan(theta)  # d-spacing
-        self.de2 = delta_theta_B01(chi, theta, t, p)  # finite source distance
-        self.de3 = darwin_width(mono.hkl) * np.tan(theta)  # darwin width
-        self.de4 = s / p  # source size
 
 
 class QuasiMonoBeam:
@@ -89,40 +71,40 @@ class QuasiMonoBeam:
         self.chi_2 = self._chi_2()
         self.theta_B2 = self._theta_B2()
 
-    def _chi_1(self):
-        return self.chi + delta_chi(self.chi, self.nu, self.t, self.r)
+    # def _chi_1(self):
+    #     return self.chi + delta_chi(self.chi, self.nu, self.t, self.r)
 
-    def _theta_B1(self):
-        d_theta_source_distance = delta_theta_B01(self.chi, self.theta, self.t, self.p)
-        theta_B1 = self.theta + d_theta_source_distance + self.theta_Bmis
-        return theta_B1
+    # def _theta_B1(self):
+    #     d_theta_source_distance = delta_theta_B01(self.chi, self.theta, self.t, self.p)
+    #     theta_B1 = self.theta + d_theta_source_distance + self.theta_Bmis
+    #     return theta_B1
 
-    def _fg_1(self):
-        fg_1 = geo_focus(chi=self.chi_1, theta=self.theta_B1, p=self.p, r=self.r)
-        return fg_1
+    # def _fg_1(self):
+    #     fg_1 = geo_focus(chi=self.chi_1, theta=self.theta_B1, p=self.p, r=self.r)
+    #     return fg_1
 
-    def _chi_2(self):
-        return self._chi_1()
+    # def _chi_2(self):
+    #     return self._chi_1()
 
     def _theta_B2(self):
         return theta_B2_fsolver(self.chi, self.theta, self.nu, self.t, self.r, self.p)
 
-    def width(self):
-        theta_open = 2 * self.theta_Bmis
-        fg_1 = self._fg_1()
-        width = - fg_1 * theta_open
-        return width
+    # def width(self):
+    #     theta_open = 2 * self.theta_Bmis
+    #     fg_1 = self._fg_1()
+    #     width = - fg_1 * theta_open
+    #     return width
 
-    def foot_length(self):
-        width = self.width()
-        chi_2 = self._chi_2()
-        theta_B2 = self._theta_B2()
-        length = width / np.cos(theta_B2 - chi_2)
-        return length
+    # def foot_length(self):
+    #     width = self.width()
+    #     chi_2 = self._chi_2()
+    #     theta_B2 = self._theta_B2()
+    #     length = width / np.cos(theta_B2 - chi_2)
+    #     return length
 
-    def get_alpha_BC(self):
-        length = self.foot_length()
-        return np.cos(self.theta_B2 + self.chi_2) * length / self.p
+    # def get_alpha_BC(self):
+    #     length = self.foot_length()
+    #     return np.cos(self.theta_B2 + self.chi_2) * length / self.p
 
     def angular_spread(self):
         delta_theta_Q1 = BentLaueMono(self.chi, self.theta, self.nu, self.t, self.r, self.p).energy_resolution.de1
@@ -144,36 +126,37 @@ def darwin_width(hkl=(1, 1, 1)):
 
 # Magic condition angle equations
 
-def delta_chi(chi, nu, t, r):
-    delta_chi = -(1 + nu) * t * np.sin(2 * chi) / (2 * r)
-    return delta_chi
+# def delta_chi(chi, nu, t, r):
+#     delta_chi = -(1 + nu) * t * np.sin(2 * chi) / (2 * r)
+#     return delta_chi
 
 
-def delta_psi(chi, theta, t, r):
-    delta_psi = -t * np.tan(theta - chi) / r
-    return delta_psi
+# def delta_psi(chi, theta, t, r):
+#     delta_psi = -t * np.tan(theta - chi) / r
+#     return delta_psi
 
 
-def get_alpha_AB(chi, theta, t, p):
-    alpha = (t / p) * (np.sin(2 * theta) / np.cos(chi - theta))
-    return alpha
+# def get_alpha_AB(chi, theta, t, p):
+#     alpha = (t / p) * (np.sin(2 * theta) / np.cos(chi - theta))
+#     return alpha
 
 
 def magic_condition_angles(chi, theta, nu, t, r, p):
-    theta_misalignment = delta_psi(chi, theta, t, r) - delta_chi(chi, nu, t, r) - 1 / 2 * get_alpha_AB(chi, theta, t, p)
+    angles = geometry.Angles(chi, theta, nu, t, r, p)
+    theta_misalignment = angles.delta_psi_AB() - angles.delta_chi_AB() + angles.delta_theta_AB()
     return theta_misalignment
 
 
 # Magic condition foci equations
 
-def geo_focus(chi, theta, r, p):
-    f_g = np.cos(chi - theta) / (np.cos(chi + theta) / p + 2.0 / r)
-    return f_g
+# def geo_focus(chi, theta, r, p):
+#     f_g = np.cos(chi - theta) / (np.cos(chi + theta) / p + 2.0 / r)
+#     return f_g
 
 
-def single_ray_focus(chi, theta, nu, r):
-    f_s = (r * np.sin(2.0 * theta)) / (2.0 * np.sin(chi + theta) + (1 + nu) * np.sin(2.0 * chi) * np.cos(chi + theta))
-    return f_s
+# def single_ray_focus(chi, theta, nu, r):
+#     f_s = (r * np.sin(2.0 * theta)) / (2.0 * np.sin(chi + theta) + (1 + nu) * np.sin(2.0 * chi) * np.cos(chi + theta))
+#     return f_s
 
 
 def magic_condition_foci(chi, theta, nu, r, p):
@@ -181,8 +164,8 @@ def magic_condition_foci(chi, theta, nu, r, p):
 
 
 # Others
-def delta_theta_B01(chi, theta, t, p):
-    return -1 / 2 * get_alpha_AB(chi, theta, t, p)
+# def delta_theta_B01(chi, theta, t, p):
+#     return -1 / 2 * get_alpha_AB(chi, theta, t, p)
 
 
 def theta_B2_fsolver(chi, theta, nu, t, r, p, verbose=False):  # TODO: double check this function
@@ -231,14 +214,6 @@ import numpy as np
 
 mc_backup.mono_beam_width(chi=np.radians(4.4671), theta=np.radians(8.99), nu=0.2, T=0.3, R=2000, D=22000)
 
-
-# %%
-class Test:
-    def get_a(self, a):
-        self.__a = a
-
-    def show_a(self):
-        print(self.__a)
 
 
 # %%
