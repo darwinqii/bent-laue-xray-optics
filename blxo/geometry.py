@@ -44,7 +44,7 @@ class Angles:
     # Other alpha angles (angles from the finite source distance)
     def alpha_BC(self):  # todo: double check using point A or point C for theta and chi
         qmb_foot_length = Lengths(self.chi, self.theta, self.nu, self.t, self.r, self.p).foot_length()
-        return np.cos(self.theta_B + self.chi_B) * qmb_foot_length / self.p
+        return np.cos(self.theta_B() + self.chi_B()) * qmb_foot_length / self.p
 
     def chi_B(self):
         return self.chi + self.delta_chi_AB()
