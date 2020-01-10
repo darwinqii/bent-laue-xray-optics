@@ -1,4 +1,0 @@
-[console_scripts]
-math_physics = magition:math_physics
-mc = magition:mc
-

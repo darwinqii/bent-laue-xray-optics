@@ -1,0 +1,8 @@
+README.md
+setup.py
+blxo.egg-info/PKG-INFO
+blxo.egg-info/SOURCES.txt
+blxo.egg-info/dependency_links.txt
+blxo.egg-info/entry_points.txt
+blxo.egg-info/requires.txt
+blxo.egg-info/top_level.txt

@@ -3,7 +3,7 @@
 import re
 import setuptools
 
-version = "0.0.5"
+version = "0.1.2"
 # with open('magition/__init__.py', 'r') as fd:
 #     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
 #                         fd.read(), re.MULTILINE).group(1)
@@ -14,9 +14,9 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="blxo",
     version=version,
-    author="darwinqii",
+    author="Peng Qi",
     author_email="peng.qi@usask.ca",
-    description="Some functions for Bent Laue Monochromators",
+    description="Bent Laue Monochromators X-ray Optics",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/darwinqii",
@@ -26,5 +26,7 @@ setuptools.setup(
         'pandas',
         'scipy>=1.2.1',
         'pathlib'
-    ],entry_points={'console_scripts':['mc=blxo:mc','math_physics=blxo:math_physics']}
+    ], entry_points={'console_scripts': ['mc=blxo:mc',
+                                         'math_physics=blxo:math_physics',
+                                         'geometry=blxo:geometry']}
 )

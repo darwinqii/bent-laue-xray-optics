@@ -1,3 +1,1 @@
-import mc
-import math_physics as mp
-import geometry
+from blxo import mc, geometry, math_physics
