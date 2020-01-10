@@ -1,10 +1,10 @@
-# %%
 import os
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
 import sys
 
 sys.path.extend([file_dir])
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
@@ -25,28 +25,175 @@ TODO: keep the calculated values (eg. geo_focus()) as a method, so that it canno
 
 
 class BentLaueMono(object):
-    chi = 5
-
     def __init__(self, chi, theta, nu, t, r, p, s=0, hkl=(1, 1, 1)):  # radians, mm.
-        self.chi = chi
-        self.theta = theta
-        self.nu = nu
-        self.t = t
-        self.r = r
-        self.p = p
-        self.s = s
-        self.hkl = hkl
+        self.__chi = chi
+        self.__theta = theta
+        self.__nu = nu
+        self.__t = t
+        self.__r = r
+        self.__p = p
+        self.__s = s
+        self.__hkl = hkl
         self.__angles = geometry.Angles(chi, theta, nu, t, r, p)
+        self.__angle_resolution = self.angle_resolution_function()
+        self.__energy_resolution = self.energy_resolution_function()
         self.__lengths = geometry.Lengths(chi, theta, nu, t, r, p)
-        self.qmb = self.quasi_mono_beam()
-        # self.angle_resolution=None
-        # self.energy_resolution=None
+        self.__qmb = self.quasi_mono_beam()
+        self.__focal_size = self.focal_size_function()
+        self.__f2d_optimal = self.f2d_optimal_function()
 
-        # self.geo_focus = geo_focus(chi=chi, theta=theta, p=p, r=r)
-        # self.single_ray_focus = single_ray_focus(chi, theta, nu, r)
-        # self.theta_Bmis = magic_condition_angles(chi, theta, nu, t, r, p)
-        # self.energy_resolution = self.EnergyResolution(self)
-        # self.quasi_mono_beam = QuasiMonoBeam(chi, theta, nu, t, r, p)
+    # @property
+    # def chi(self):
+    #     return self.__chi
+    # @chi.setter
+    # def chi(self, var):
+    #     print('setter method called')
+    #     if self.__chi==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"chi" is changed to a new value.')
+    #         self.__chi=var
+    #
+    # @property
+    # def theta(self):
+    #     return self.__theta
+    # @theta.setter
+    # def theta(self, var):
+    #     print('setter method called')
+    #     if self.__theta==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"theta" is changed to a new value.')
+    #         self.__theta=var
+    #
+    # @property
+    # def nu(self):
+    #     return self.__nu
+    # @nu.setter
+    # def nu(self, var):
+    #     print('setter method called')
+    #     if self.__nu==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"nu" is changed to a new value.')
+    #         self.__nu=var
+    #
+    # @property
+    # def t(self):
+    #     return self.__t
+    # @t.setter
+    # def t(self, var):
+    #     print('setter method called')
+    #     if self.__t==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"t" is changed to a new value.')
+    #         self.__t=var
+    #
+    # @property
+    # def r(self):
+    #     return self.__r
+    # @r.setter
+    # def r(self, var):
+    #     print('setter method called')
+    #     if self.__r==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"r" is changed to a new value.')
+    #         self.__r=var
+    #
+    # @property
+    # def p(self):
+    #     return self.__p
+    # @p.setter
+    # def p(self, var):
+    #     print('setter method called')
+    #     if self.__p==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"p" is changed to a new value.')
+    #         self.__p=var
+    #
+    # @property
+    # def s(self):
+    #     return self.__s
+    # @s.setter
+    # def s(self, var):
+    #     print('setter method called')
+    #     if self.__s==var:
+    #         pass
+    #     else:
+    #         warnings.warn('"s" is changed to a new value.')
+    #         self.__s=var
+    #
+    # @property
+    # def hkl(self):
+    #     return self.__hkl
+    #
+    # @hkl.setter
+    # def hkl(self, var):
+    #     print('setter method called')
+    #     if self.__hkl == var:
+    #         pass
+    #     else:
+    #         warnings.warn('"hkl" is changed to a new value.')
+    #         self.__hkl = var
+
+    @property
+    def qmb(self):
+        return self.__qmb
+
+    @qmb.setter
+    def qmb(self, var):
+        raise Exception('"qmb" value should not be changed directly.')
+
+    @property
+    def angles(self):
+        return self.__angles
+
+    @angles.setter
+    def angles(self, var):
+        raise Exception('"angles" value should not be changed directly.')
+
+    @property
+    def lengths(self):
+        return self.__lengths
+
+    @lengths.setter
+    def lengths(self, var):
+        raise Exception('"lengths" value should not be changed directly.')
+
+    @property
+    def angle_resolution(self):
+        return self.__angle_resolution
+
+    @angle_resolution.setter
+    def angle_resolution(self, var):
+        raise Exception('"angle_resolution" value should not be changed directly.')
+
+    @property
+    def energy_resolution(self):
+        return self.__energy_resolution
+
+    @energy_resolution.setter
+    def energy_resolution(self, var):
+        raise Exception('"energy_resolution" value should not be changed directly.')
+
+    @property
+    def focal_size(self):
+        return self.__focal_size
+
+    @focal_size.setter
+    def focal_size(self, var):
+        raise Exception('"focal_size" value should not be changed directly.')
+
+    @property
+    def f2d_optimal(self):
+        return self.__f2d_optimal
+
+    @f2d_optimal.setter
+    def f2d_optimal(self, var):
+        raise Exception('"f2d_optimal" value should not be changed directly.')
 
     def quasi_mono_beam(self):
         # lengths = geometry.Lengths(self.chi, self.theta, self.nu, self.t, self.r, self.p)
@@ -54,7 +201,7 @@ class BentLaueMono(object):
         foot_length = self.__lengths.foot_length()
 
         def angular_spread(self):
-            delta_theta_Q1 = self.angle_resolution()['dtheta_1']
+            delta_theta_Q1 = self.angle_resolution['dtheta_1']
             delta_theta_Q2 = -(self.__angles.alpha_AB() - self.__angles.alpha_BC()) / 2
             delta_theta_Q = delta_theta_Q1 + delta_theta_Q2
             return delta_theta_Q
@@ -63,41 +210,41 @@ class BentLaueMono(object):
 
         return {'width': width, 'foot_length': foot_length, 'angular_spread': ang_sprd}
 
-    def angle_resolution(self):
-        dtheta1 = -self.t / self.r * (np.cos(self.chi) ** 2 - self.nu * np.sin(self.chi) ** 2) * np.tan(
-            self.theta)  # d-spacing
+    def angle_resolution_function(self):
+        dtheta1 = -self.__t / self.__r * (np.cos(self.__chi) ** 2 - self.__nu * np.sin(self.__chi) ** 2) * np.tan(
+            self.__theta)  # d-spacing
         dtheta2 = self.__angles.delta_theta_AB()  # finite source distance
-        dtheta3 = darwin_width(self.hkl) * np.tan(self.theta)  # darwin width
-        dtheta4 = self.s / self.p  # source size
+        dtheta3 = darwin_width(self.__hkl) * np.tan(self.__theta)  # darwin width
+        dtheta4 = self.__s / self.__p  # source size
         dtheta_all = np.sqrt(
             (dtheta1 + dtheta2) ** 2 + dtheta3 ** 2 + dtheta4 ** 2)  # Absolute value only. Non-directional.
-        return {'dtheta_1': dtheta1,
-                'dtheta_2': dtheta2,
-                'dtheta_3': dtheta3,
-                'dtheta_4': dtheta4,
+        return {'dtheta_1': dtheta1,  # dtheta/theta
+                'dtheta_2': dtheta2,  # dtheta/theta
+                'dtheta_3': dtheta3,  # dtheta/theta
+                'dtheta_4': dtheta4,  # dtheta/theta
                 'dtheta_all': dtheta_all}
 
-    def energy_resolution(self):
-        angle_res = self.angle_resoltution()
-        return {'de_1': - angle_res['dtheta_1'] / np.tan(self.theta),
-                'de_2': - angle_res['dtheta_2'] / np.tan(self.theta),
-                'de_3': - angle_res['dtheta_3'] / np.tan(self.theta),
-                'de_4': - angle_res['dtheta_4'] / np.tan(self.theta),
-                'de_all': angle_res['dtheta_all'] / np.tan(self.theta)}  # Absolute value only. Non-directional.
+    def energy_resolution_function(self):
+        angle_res = self.angle_resolution
+        return {'de_1': - angle_res['dtheta_1'] / np.tan(self.__theta),  # dE/E
+                'de_2': - angle_res['dtheta_2'] / np.tan(self.__theta),  # dE/E
+                'de_3': - angle_res['dtheta_3'] / np.tan(self.__theta),  # dE/E
+                'de_4': - angle_res['dtheta_4'] / np.tan(self.__theta),  # dE/E
+                'de_all': angle_res['dtheta_all'] / np.tan(self.__theta)}  # Absolute value only. Non-directional.
 
-    def f2d_optimal(self):
+    def f2d_optimal_function(self):
         # qmb = self.quasi_mono_beam()
         width = self.qmb['width']
         ang_sprd = self.qmb['angular_spread']
         fg = self.__lengths.geo_focus()
-        f2d = -(1 / self.r + np.cos(self.chi + self.theta) / self.p) * width * fg / (
-                ang_sprd * np.cos(self.chi - self.theta))
+        f2d = -(1 / self.__r + np.cos(self.__chi + self.__theta) / self.__p) * width * fg / (
+                ang_sprd * np.cos(self.__chi - self.__theta))
         return f2d
 
-    def focal_size(self):
+    def focal_size_function(self):
         fg = self.__lengths.geo_focus()
         width = self.qmb['width']
-        return np.sqrt((fg * self.s / self.p) ** 2 + width ** 2)
+        return np.sqrt((fg * self.__s / self.__p) ** 2 + width ** 2)
 
 
 def magic_condition_angles(chi, theta, nu, t, r, p):
@@ -105,6 +252,11 @@ def magic_condition_angles(chi, theta, nu, t, r, p):
     angles = geometry.Angles(chi, theta, nu, t, r, p)
     theta_misalignment = angles.delta_psi_AB() - angles.delta_chi_AB() + angles.delta_theta_AB()
     return theta_misalignment
+
+
+def magic_condition_foci(chi, theta, nu, t, r, p):
+    lengths = geometry.Lengths(chi, theta, nu, t, r, p)
+    return lengths.geo_focus() - lengths.single_ray_focus()
 
 
 def darwin_width(hkl=(1, 1, 1)):
