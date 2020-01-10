@@ -38,6 +38,7 @@ class BentLaueMono(object):
         self.hkl = hkl
         self.__angles = geometry.Angles(chi, theta, nu, t, r, p)
         self.__lengths = geometry.Lengths(chi, theta, nu, t, r, p)
+        self.qmb = self.quasi_mono_beam()
         # self.angle_resolution=None
         # self.energy_resolution=None
 
@@ -85,13 +86,18 @@ class BentLaueMono(object):
                 'de_all': angle_res['dtheta_all'] / np.tan(self.theta)}  # Absolute value only. Non-directional.
 
     def f2d_optimal(self):
-        qmb = self.quasi_mono_beam()
-        width = qmb['width']
-        ang_sprd = qmb['angular_spread']
+        # qmb = self.quasi_mono_beam()
+        width = self.qmb['width']
+        ang_sprd = self.qmb['angular_spread']
         fg = self.__lengths.geo_focus()
         f2d = -(1 / self.r + np.cos(self.chi + self.theta) / self.p) * width * fg / (
                 ang_sprd * np.cos(self.chi - self.theta))
         return f2d
+
+    def focal_size(self):
+        fg = self.__lengths.geo_focus()
+        width = self.qmb['width']
+        return np.sqrt((fg * self.s / self.p) ** 2 + width ** 2)
 
 
 def magic_condition_angles(chi, theta, nu, t, r, p):
@@ -113,11 +119,7 @@ if __name__ == '__main__':
     print(mono.quasi_mono_beam()['width'])
     print(mono.quasi_mono_beam()['angular_spread'])
 
-    #     def _theta_B2(self):
-    #         return theta_B2_fsolver(self.chi, self.theta, self.nu, self.t, self.r, self.p)
-    #
 
-    #
     #
     # def magic_condition_foci(chi, theta, nu, r, p):
     #     return single_ray_focus(chi, theta, nu, r) - geo_focus(chi, theta, p, r)
