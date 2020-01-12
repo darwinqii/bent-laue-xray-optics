@@ -8,7 +8,11 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
-import blxo.geometry as geometry
+
+try:
+    import blxo.geometry as geometry
+except:
+    import geometry
 
 '''
 alpha: Incident ray angle divergence from a point source with FINITE source distance.
@@ -19,7 +23,7 @@ delta_theta_AB: The Bragg angle divergence from A to B. Or `theta_B-theta_A`.
 chi: Angles refering to asymmetry angle. 
 
 
-TODO: keep the calculated values (eg. geo_focus()) as a method, so that it cannot be altered simply by assigning a value
+TODO: - Bandwidth
 
 '''
 
@@ -212,16 +216,26 @@ class BentLaueMono(object):
 
     def angle_resolution_function(self):
         dtheta1 = -self.__t / self.__r * (np.cos(self.__chi) ** 2 - self.__nu * np.sin(self.__chi) ** 2) * np.tan(
-            self.__theta)  # d-spacing
-        dtheta2 = self.__angles.delta_theta_AB()  # finite source distance
-        dtheta3 = darwin_width(self.__hkl) * np.tan(self.__theta)  # darwin width
-        dtheta4 = self.__s / self.__p  # source size
+            self.__theta) \
+                  + (self.__chi - self.__chi) + (self.__theta - self.__theta) + (self.__nu - self.__nu) + (
+                          self.__t - self.__t) + (self.__r - self.__r) + (self.__p - self.__p) + (
+                          self.__s - self.__s)  # d-spacing
+        dtheta2 = self.__angles.delta_theta_AB() \
+                  + (self.__chi - self.__chi) + (self.__theta - self.__theta) + (self.__nu - self.__nu) + (
+                          self.__t - self.__t) + (self.__r - self.__r) + (self.__p - self.__p) + (
+                          self.__s - self.__s)  # finite source distance
+        dtheta3 = darwin_width(self.__hkl) * np.tan(self.__theta) \
+                  + (self.__chi - self.__chi) + (self.__r - self.__r) + (self.__nu - self.__nu) + (
+                          self.__t - self.__t) + (self.__p - self.__p) + (self.__s - self.__s)  # darwin width
+        dtheta4 = self.__s / self.__p \
+                  + (self.__chi - self.__chi) + (self.__theta - self.__theta) + (self.__nu - self.__nu) + (
+                          self.__t - self.__t) + (self.__r - self.__r)  # source size
         dtheta_all = np.sqrt(
             (dtheta1 + dtheta2) ** 2 + dtheta3 ** 2 + dtheta4 ** 2)  # Absolute value only. Non-directional.
-        return {'dtheta_1': dtheta1,  # dtheta/theta
-                'dtheta_2': dtheta2,  # dtheta/theta
-                'dtheta_3': dtheta3,  # dtheta/theta
-                'dtheta_4': dtheta4,  # dtheta/theta
+        return {'dtheta_1': dtheta1,  # dtheta
+                'dtheta_2': dtheta2,  # dtheta
+                'dtheta_3': dtheta3,  # dtheta
+                'dtheta_4': dtheta4,  # dtheta
                 'dtheta_all': dtheta_all}
 
     def energy_resolution_function(self):
@@ -248,7 +262,6 @@ class BentLaueMono(object):
 
 
 def magic_condition_angles(chi, theta, nu, t, r, p):
-    print('cool')
     angles = geometry.Angles(chi, theta, nu, t, r, p)
     theta_misalignment = angles.delta_psi_AB() - angles.delta_chi_AB() + angles.delta_theta_AB()
     return theta_misalignment
@@ -270,11 +283,6 @@ if __name__ == '__main__':
     mono = BentLaueMono(chi=np.radians(10), theta=np.radians(8.99), nu=0.2, t=0.3, r=2000, p=22000)
     print(mono.quasi_mono_beam()['width'])
     print(mono.quasi_mono_beam()['angular_spread'])
-
-
-    #
-    # def magic_condition_foci(chi, theta, nu, r, p):
-    #     return single_ray_focus(chi, theta, nu, r) - geo_focus(chi, theta, p, r)
 
     #
     #
@@ -310,31 +318,9 @@ if __name__ == '__main__':
     #             arg_length = 1
     #     theta_B2 = fsolve(theta_B2_equation, np.ones(arg_length) * theta, args=(chi, theta, nu, r, p, t))[0]
     #     return theta_B2
+
     #
-    #
-    # def focal_size(chi, theta, nu, T, R, D, S0=0, verbose=False):
-    #     f_g = geo_focus(chi, theta, R, D)
-    #     width = mono_beam_width(chi, theta, nu, T, R, D)
-    #     size = abs((f_g / D) * S0) + abs(width)
-    #     return size
-    #
-    #
-    # def energy_resolution_all(chi, theta, nu, R, D, T,
-    #                           S=0.118,  # source_size FWHM at BMIT_BM is 118um
-    #                           hkl=[1, 1, 1],  # Darwin width for silicon [111] is dE/E=134.3 x 10^-6
-    #                           return_all=False):
-    #     # energy resolution contributions
-    #     term1 = delta_theta_d_spacing(chi, theta, nu, R, T) / (-np.tan(theta))  # d-spacing
-    #     term2 = delta_theta_source_distance(chi, theta, D, T) / (-np.tan(theta))  # finite source distance
-    #     term3 = delta_theta_darwin(theta, hkl) / (-np.tan(theta))  # darwin width
-    #     term4 = delta_theta_source_size(D, S) / (-np.tan(theta))  # source size
-    #
-    #     resolution = np.sqrt((term1 + term2) ** 2 + term3 ** 2 + term4 ** 2)
-    #
-    #     if return_all:
-    #         return resolution, term1, term2, term3, term4
-    #     else:
-    #         return resolution
+
     #
     #
     # def mc_angle_solver(theta=None, chi=None, R=None, nu=None, D=None, T=None, verbose=False):
@@ -358,30 +344,9 @@ if __name__ == '__main__':
     #     return ulti_chi
     #
     #
-    # def mc_focus_solver(theta=None, chi=None, R=None, nu=None, D=None, T=None):
-    #     chi_range_a = np.radians(np.arange(-80.0, 80.0, 0.01))
-    #     scores_range_a = magic_condition_foci(chi_range_a, theta=theta, D=D, R=R, nu=nu)
-    #     ulti_chi = chi_range_a[abs(scores_range_a).argmin()]
-    #     plt.figure()
-    #     plt.plot(chi_range_a, scores_range_a)
-    #     plt.ylim(-10000000, 10000000)
-    #     plt.grid()
+
     #
-    #     chi_range_b = np.arange(ulti_chi - np.radians(1), ulti_chi + np.radians(1), 0.0001)
-    #     scores_range_b = magic_condition_foci(chi_range_b, theta=theta, D=D, R=R, nu=nu)
-    #     ulti_chi = chi_range_b[abs(scores_range_b).argmin()]
-    #
-    #     chi_range_c = np.arange(ulti_chi - np.radians(0.0001), ulti_chi + np.radians(0.0001), 0.0000001)
-    #     scores_range_c = magic_condition_foci(chi_range_c, theta=theta, D=D, R=R, nu=nu)
-    #     ulti_chi = chi_range_c[abs(scores_range_c).argmin()]
-    #     return ulti_chi
-    #
-    #
-    # def radius_from_geo_focus(f_g, chi, theta, D):
-    #     chi = np.radians(chi)
-    #     theta = np.radians(theta)
-    #     R = 2 / (np.cos(chi - theta) / f_g - np.cos(chi + theta) / D)
-    #     return R
+
     #
     #
     # def mc_solver_chi_focus(chi=None, f_g=None, theta=None, nu=None, D=None, T=None):

@@ -1,12 +1,8 @@
 import os
-
 file_dir = os.path.dirname(os.path.abspath(__file__))
 import sys
-
 sys.path.extend([file_dir])
-
 import numpy as np
-
 from scipy.optimize import fsolve
 
 
@@ -53,7 +49,10 @@ class Angles:
         return self.chi_B()
 
     def theta_misalign(self):
-        from blxo.mc import magic_condition_angles
+        try:
+            from blxo.mc import magic_condition_angles
+        except:
+            from mc import magic_condition_angles
         return magic_condition_angles(self.chi, self.theta, self.nu, self.t, self.r, self.p)
 
     def theta_B(self):
