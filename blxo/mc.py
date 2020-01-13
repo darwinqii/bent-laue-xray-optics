@@ -229,7 +229,7 @@ class BentLaueMono(object):
                           self.__t - self.__t) + (self.__p - self.__p) + (self.__s - self.__s)  # darwin width
         dtheta4 = self.__s / self.__p \
                   + (self.__chi - self.__chi) + (self.__theta - self.__theta) + (self.__nu - self.__nu) + (
-                          self.__t - self.__t) + (self.__r - self.__r)  # source size
+                          self.__t - self.__t) + (self.__r - self.__r)  # source size. source_size FWHM at BMIT_BM is 118um
         dtheta_all = np.sqrt(
             (dtheta1 + dtheta2) ** 2 + dtheta3 ** 2 + dtheta4 ** 2)  # Absolute value only. Non-directional.
         return {'dtheta_1': dtheta1,  # dtheta
@@ -240,10 +240,10 @@ class BentLaueMono(object):
 
     def energy_resolution_function(self):
         angle_res = self.angle_resolution
-        return {'de_1': - angle_res['dtheta_1'] / np.tan(self.__theta),  # dE/E
-                'de_2': - angle_res['dtheta_2'] / np.tan(self.__theta),  # dE/E
-                'de_3': - angle_res['dtheta_3'] / np.tan(self.__theta),  # dE/E
-                'de_4': - angle_res['dtheta_4'] / np.tan(self.__theta),  # dE/E
+        return {'de_1': abs(- angle_res['dtheta_1'] / np.tan(self.__theta)),  # dE/E
+                'de_2': abs(- angle_res['dtheta_2'] / np.tan(self.__theta)),  # dE/E
+                'de_3': abs(- angle_res['dtheta_3'] / np.tan(self.__theta)),  # dE/E
+                'de_4': abs(- angle_res['dtheta_4'] / np.tan(self.__theta)),  # dE/E
                 'de_all': angle_res['dtheta_all'] / np.tan(self.__theta)}  # Absolute value only. Non-directional.
 
     def f2d_optimal_function(self):
