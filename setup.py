@@ -3,7 +3,7 @@
 import re
 import setuptools
 
-version = "0.1.3"
+version = "0.1.4"
 # with open('magition/__init__.py', 'r') as fd:
 #     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
 #                         fd.read(), re.MULTILINE).group(1)
