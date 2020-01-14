@@ -1,6 +1,8 @@
 import os
+
 file_dir = os.path.dirname(os.path.abspath(__file__))
 import sys
+
 sys.path.extend([file_dir])
 import numpy as np
 from scipy.optimize import fsolve
@@ -8,22 +10,22 @@ from scipy.optimize import fsolve
 
 class Angles:
     def __init__(self, chi, theta, nu, t, r, p):
-        self.chi = chi
-        self.theta = theta
-        self.nu = nu
-        self.t = t
-        self.r = r
-        self.p = p
+        self.__chi = chi
+        self.__theta = theta
+        self.__nu = nu
+        self.__t = t
+        self.__r = r
+        self.__p = p
 
     # magic condition core angles
-    def delta_psi_AB(self):
-        return -self.t * np.tan(self.theta - self.chi) / self.r
+    def delta_phi_AB(self):
+        return -self.__t * np.tan(self.__theta - self.__chi) / self.__r
 
     def delta_chi_AB(self):
-        return -(1 + self.nu) * self.t * np.sin(2 * self.chi) / (2 * self.r)
+        return -(1 + self.__nu) * self.__t * np.sin(2 * self.__chi) / (2 * self.__r)
 
-    def alpha_AB(self):
-        return (self.t / self.p) * (np.sin(2 * self.theta) / np.cos(self.chi - self.theta))
+    def psi_AB(self):
+        return (self.__t / self.__p) * (np.sin(2 * self.__theta) / np.cos(self.__chi - self.__theta))
 
     def delta_theta_AB(self):
         '''
@@ -35,15 +37,15 @@ class Angles:
         Returns:
 
         '''
-        return -1 / 2 * self.alpha_AB()
+        return -1 / 2 * self.psi_AB()
 
-    # Other alpha angles (angles from the finite source distance)
-    def alpha_BC(self):  # todo: double check using point A or point C for theta and chi
-        qmb_foot_length = Lengths(self.chi, self.theta, self.nu, self.t, self.r, self.p).foot_length()
-        return np.cos(self.theta_B() + self.chi_B()) * qmb_foot_length / self.p
+    # Other psi angles (angles from the finite source distance)
+    def psi_BC(self):  # todo: double check using point A or point C for theta and chi
+        qmb_foot_length = Lengths(self.__chi, self.__theta, self.__nu, self.__t, self.__r, self.__p).foot_length()
+        return np.cos(self.theta_B() + self.chi_B()) * qmb_foot_length / self.__p
 
     def chi_B(self):
-        return self.chi + self.delta_chi_AB()
+        return self.__chi + self.delta_chi_AB()
 
     def chi_C(self):
         return self.chi_B()
@@ -53,10 +55,10 @@ class Angles:
             from blxo.mc import magic_condition_angles
         except:
             from mc import magic_condition_angles
-        return magic_condition_angles(self.chi, self.theta, self.nu, self.t, self.r, self.p)
+        return magic_condition_angles(self.__chi, self.__theta, self.__nu, self.__t, self.__r, self.__p)
 
     def theta_B(self):
-        return self.theta + self.delta_theta_AB() + self.theta_misalign()
+        return self.__theta + self.delta_theta_AB() + self.theta_misalign()
 
     def theta_C(self):  # todo
         pass
@@ -67,27 +69,27 @@ class Angles:
 
 class Lengths:
     def __init__(self, chi, theta, nu, t, r, p):
-        self.chi = chi
-        self.theta = theta
-        self.nu = nu
-        self.t = t
-        self.r = r
-        self.p = p
+        self.__chi = chi
+        self.__theta = theta
+        self.__nu = nu
+        self.__t = t
+        self.__r = r
+        self.__p = p
         self.__angles = Angles(chi, theta, nu, t, r, p)
 
     def geo_focus(self):
-        return np.cos(self.chi - self.theta) / (np.cos(self.chi + self.theta) / self.p + 2.0 / self.r)
+        return np.cos(self.__chi - self.__theta) / (np.cos(self.__chi + self.__theta) / self.__p + 2.0 / self.__r)
 
     def single_ray_focus(self):
-        return (self.r * np.sin(2.0 * self.theta)) / (
-                2.0 * np.sin(self.chi + self.theta) + (1 + self.nu) * np.sin(2.0 * self.chi) * np.cos(
-            self.chi + self.theta))
+        return (self.__r * np.sin(2.0 * self.__theta)) / (
+                2.0 * np.sin(self.__chi + self.__theta) + (1 + self.__nu) * np.sin(2.0 * self.__chi) * np.cos(
+            self.__chi + self.__theta))
 
     def width(self):
         theta_open = self.__angles.theta_open()
         chi_B = self.__angles.chi_B()
         theta_B = self.__angles.theta_B()
-        fg_B = Lengths(chi_B, theta_B, self.nu, self.t, self.r, self.p).geo_focus()
+        fg_B = Lengths(chi_B, theta_B, self.__nu, self.__t, self.__r, self.__p).geo_focus()
         return - fg_B * theta_open
 
     def foot_length(self):  # todo: double check using point B or point C for theta and chi
@@ -98,7 +100,4 @@ class Lengths:
 
 
 if __name__ == '__main__':
-    # print(Angles(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000).theta_misalign())
-    import os
-
-    print(os.path.dirname(os.path.abspath(__file__)))
+    print(Angles(chi=np.radians(4.4671), theta=np.radians(8.99), nu=0.2, t=0.3, r=2000, p=22000).theta_misalign())
