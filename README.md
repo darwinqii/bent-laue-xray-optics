@@ -62,7 +62,7 @@ mono = mc.BentLaueMono(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.
    # `mc_angle_misalignment` is expected to be zero (or zero enough) when the magic condition is met.
 
    # Magic condition function in terms of foci
-   mc_angle_misalignment = mc.magic_condition_foci(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000) # Thickness (t) is not a factor in the calculation, but a called module requires it for some other functions. So just give it any number.
+   mc_focus_misalignment = mc.magic_condition_foci(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000) # Thickness (t) is not a factor in the calculation, but a called module requires it for some other functions. So just give it any number.
     ```
    5. Others
    ```python
