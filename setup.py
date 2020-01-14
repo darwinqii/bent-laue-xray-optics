@@ -3,7 +3,7 @@
 import re
 import setuptools
 
-version = "0.1.4"
+version = "0.1.5"
 # with open('magition/__init__.py', 'r') as fd:
 #     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
 #                         fd.read(), re.MULTILINE).group(1)
@@ -19,7 +19,7 @@ setuptools.setup(
     description="Bent Laue Monochromators X-ray Optics",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/darwinqii",
+    url="https://github.com/darwinqii/bent-laue-xray-optics",
     install_requires=[
         'numpy',
         'matplotlib',
