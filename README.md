@@ -49,7 +49,7 @@ mono = mc.BentLaueMono(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.
    3. Optimal focus-to-detector distance
 
     ```python
-    qmb.f2d_optimal
+    mono.f2d_optimal
     ```
 
    4. Calculators for magic condition
