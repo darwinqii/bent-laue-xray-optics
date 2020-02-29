@@ -3,7 +3,7 @@
 import re
 import setuptools
 
-version = "0.1.5"
+version = "0.1.6"
 # with open('magition/__init__.py', 'r') as fd:
 #     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
 #                         fd.read(), re.MULTILINE).group(1)
@@ -14,6 +14,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="blxo",
     version=version,
+    packages=['blxo'],
     author="Peng Qi",
     author_email="peng.qi@usask.ca",
     description="Bent Laue Monochromators X-ray Optics",

@@ -1,11 +1,82 @@
 Metadata-Version: 2.1
 Name: blxo
-Version: 0.1.5
+Version: 0.1.6
 Summary: Bent Laue Monochromators X-ray Optics
 Home-page: https://github.com/darwinqii/bent-laue-xray-optics
 Author: Peng Qi
 Author-email: peng.qi@usask.ca
 License: UNKNOWN
 Description: # BLXO (Bent Laue X-ray Optics)
+        
+        ## Installation
+        
+        ### Option 1
+        
+        ```bash
+        pip install blxo
+        ```
+        
+        ### Option 2
+        
+        Download the repository. Import the `blxo` folder as a python package.
+        
+        ## How to use it
+        
+        1. Define a monochromator with your parameters.
+        
+           Example:
+        
+        ```python
+        from blxo import *
+        mono = mc.BentLaueMono(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000) # Length unit is mm. Angle unit is radians.
+        ```
+        
+        2. Get the interested properties from the monochromator.
+        
+           1. Quasi-mono beam
+        
+            ```python
+           qmb = mono.qmb
+           # Quasi-mono beam width (mm)
+           width = qmb['width']
+           # Quasi-mono beam footlength (mm)
+           footlength = qmb['foot_length']
+           # Energy spread of the QMB in terms of angle (rad)
+           ang_spread = qmb['angular_spread']
+            ```
+        
+              2. Resolutions
+        
+            ```python
+           # Energy resolution
+           mono.energy_resolution
+           # Energy resolution in terms of angle
+           mono.angle_resolution
+            ```
+        
+           3. Optimal focus-to-detector distance
+        
+            ```python
+            mono.f2d_optimal
+            ```
+        
+           4. Calculators for magic condition
+        
+            ```python
+           from blxo import *
+           # Expect the result to be zero when the magic condition is met.
+           # Magic condition function in terms of angle
+           mc_angle_misalignment = mc.magic_condition_angles(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000)
+           # `mc_angle_misalignment` is expected to be zero (or zero enough) when the magic condition is met.
+        
+           # Magic condition function in terms of foci
+           mc_focus_misalignment = mc.magic_condition_foci(chi=np.radians(4.4671),theta=np.radians(8.99),nu=0.2,t=0.3,r=2000,p=22000) # Thickness (t) is not a factor in the calculation, but a called module requires it for some other functions. So just give it any number.
+            ```
+           5. Others
+           ```python
+           mono.lengths.geo_focus()
+           mono.lengths.single_ray_focus()
+           ```
+        
 Platform: UNKNOWN
 Description-Content-Type: text/markdown
