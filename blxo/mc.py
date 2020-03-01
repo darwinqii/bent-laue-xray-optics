@@ -24,7 +24,7 @@ chi: Angles refering to asymmetry angle.
 
 
 TODO: - Bandwidth
-      - Equation solvers
+      - Equation solvers.
       - Darwin width function should be a calculator instead of a dictionary reader.
 '''
 
