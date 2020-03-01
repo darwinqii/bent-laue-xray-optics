@@ -177,13 +177,59 @@ def magic_condition_foci(chi, theta, nu, t, r, p):
 
 
 def darwin_width(hkl=(1, 1, 1)):
-    darwin_code = {(1, 1, 1): 134.3e-6}
-    return darwin_code[hkl]
+    darwin_code = {(1, 1, 1): 134.3e-6,
+                   (2,2,0): 56.62,
+                   (3,1,1): 26.71,
+                   (4,0,0): 23.72,
+                   (3,3,1): 13.59,
+                   (4,2,2): 13.85,
+                   (3,3,3): 8.25,
+                   (5,1,1): 8.25,
+                   (4,4,0): 9.10,
+                   (5,3,1): 5.60,
+                   (6,2,0): 6.41,
+                   (5,3,3): 4.02,
+                   (4,4,4): 4.74,
+                   (5,5,1): 3.01,
+                   (7,1,1): 3.01,
+                   (6,4,2): 3.62,
+                   (5,5,3): 2.33,
+                   (7,3,1): 2.33,
+                   (8,0,0): 2.83,
+                   (7,3,3): 1.84,
+                   (6,6,0): 2.27,
+                   (8,2,2): 2.27,
+                   (5,5,5): 1.48,
+                   (7,5,1): 1.48,
+                   (8,4,0): 1.84,
+                   (7,5,3): 1.22,
+                   (9,1,1): 1.22,
+                   (6,6,4): 1.53,
+                   (9,3,1): 1.03,
+                   (8,4,4): 1.28,
+                   (7,5,5): 0.86,
+                   (9,3,3): 0.86,
+                   (7,7,1): 0.86,
+                   (8,6,2): 1.09,
+                   (10,2,0): 1.09,
+                   (9,5,1): 0.72,
+                   (7,7,3): 0.72,
+                   (9,5,3): 0.61,
+                   (10,4,2): 0.78,
+                   (11,1,1): 0.53,
+                   (7,7,5): 0.53,
+                   (8,8,0): 0.70}
+    hkl_sum = sum([i**2 for i in hkl])
+    for key in darwin_code:
+        if sum([i**2 for i in key]) == hkl_sum:
+            return darwin_code[key]
+    raise ValueError('Reflection ' + str(hkl) + ' is not valid.')
+    return
 
 
 if __name__ == '__main__':
     print(geometry.Angles(chi=np.radians(10), theta=np.radians(8.99), nu=0.2, t=0.3, r=2000,
                           p=22000).theta_misalign())
-    mono = BentLaueMono(chi=np.radians(10), theta=np.radians(8.99), nu=0.2, t=0.3, r=2000, p=22000)
+    mono = BentLaueMono(chi=np.radians(10), theta=np.radians(8.99), nu=0.2, t=0.3, r=2000, p=22000,hkl=(1,2,2))
     print(mono.quasi_mono_beam()['width'])
     print(mono.quasi_mono_beam()['angular_spread'])
