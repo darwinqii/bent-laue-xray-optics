@@ -4,6 +4,7 @@ blxo/__init__.py
 blxo/geometry.py
 blxo/math_physics.py
 blxo/mc.py
+blxo/vector_angle.py
 blxo.egg-info/PKG-INFO
 blxo.egg-info/SOURCES.txt
 blxo.egg-info/dependency_links.txt

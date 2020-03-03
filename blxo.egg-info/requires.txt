@@ -1,5 +1,5 @@
-numpy
 matplotlib
+numpy
 pandas
-scipy>=1.2.1
 pathlib
+scipy>=1.2.1

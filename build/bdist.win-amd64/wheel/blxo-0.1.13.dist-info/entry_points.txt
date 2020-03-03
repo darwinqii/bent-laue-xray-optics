@@ -1,0 +1,5 @@
+[console_scripts]
+geometry = blxo:geometry
+math_physics = blxo:math_physics
+mc = blxo:mc
+
